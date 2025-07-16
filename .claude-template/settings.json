@@ -10,7 +10,7 @@
           },
           {
             "type": "command",
-            "command": "uv run .claude/hooks/send_event.py --source-app cc-hook-multi-agent-obvs --event-type PreToolUse --summarize"
+            "command": "uv run .claude/hooks/prometheus_sender.py --source-app cc-hook-prometheus-obvs --event-type PreToolUse --summarize"
           }
         ]
       }
@@ -25,7 +25,7 @@
           },
           {
             "type": "command",
-            "command": "uv run .claude/hooks/send_event.py --source-app cc-hook-multi-agent-obvs --event-type PostToolUse --summarize"
+            "command": "uv run .claude/hooks/prometheus_sender.py --source-app cc-hook-prometheus-obvs --event-type PostToolUse --summarize"
           }
         ]
       }
@@ -40,7 +40,7 @@
           },
           {
             "type": "command",
-            "command": "uv run .claude/hooks/send_event.py --source-app cc-hook-multi-agent-obvs --event-type Notification --summarize"
+            "command": "uv run .claude/hooks/prometheus_sender.py --source-app cc-hook-prometheus-obvs --event-type Notification --summarize"
           }
         ]
       }
@@ -55,7 +55,7 @@
           },
           {
             "type": "command",
-            "command": "uv run .claude/hooks/send_event.py --source-app cc-hook-multi-agent-obvs --event-type Stop --add-chat"
+            "command": "uv run .claude/hooks/prometheus_sender.py --source-app cc-hook-prometheus-obvs --event-type Stop --add-chat"
           }
         ]
       }
@@ -70,7 +70,7 @@
           },
           {
             "type": "command",
-            "command": "uv run .claude/hooks/send_event.py --source-app cc-hook-multi-agent-obvs --event-type SubagentStop"
+            "command": "uv run .claude/hooks/prometheus_sender.py --source-app cc-hook-prometheus-obvs --event-type SubagentStop"
           }
         ]
       }
@@ -81,7 +81,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run .claude/hooks/send_event.py --source-app cc-hook-multi-agent-obvs --event-type PreCompact"
+            "command": "uv run .claude/hooks/prometheus_sender.py --source-app cc-hook-prometheus-obvs --event-type PreCompact"
           }
         ]
       }

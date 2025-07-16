@@ -1,0 +1,114 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Claude Code Observability",
+    "tags": ["claude-code", "observability", "ai"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Hook Events Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(claude_code_hook_events_total[5m])",
+            "legendFormat": "{{event_type}} - {{tool_name}}"
+          }
+        ],
+        "xAxis": {
+          "mode": "time"
+        },
+        "yAxes": [
+          {
+            "label": "Events/sec",
+            "logBase": 1,
+            "max": null,
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Tool Usage",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "claude_code_tool_usage_total",
+            "legendFormat": "{{tool_name}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Security Blocks",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "claude_code_security_blocks_total",
+            "legendFormat": "{{reason}}"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Active Sessions",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "claude_code_active_sessions",
+            "legendFormat": "Sessions"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 6,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Hook Events by Type",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "claude_code_hook_events_total",
+            "legendFormat": "",
+            "format": "table"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "10s",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}
