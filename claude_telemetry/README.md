@@ -1,6 +1,6 @@
-# Claude Code Enhanced Telemetry System
+# Claude Code Prometheus Observability System
 
-A comprehensive containerized Claude Code environment with full observability via OpenTelemetry, Prometheus, and Grafana.
+A streamlined containerized Claude Code environment with Prometheus-based observability via hooks system.
 
 ## Features
 
@@ -8,25 +8,23 @@ A comprehensive containerized Claude Code environment with full observability vi
 - Claude Code running in Ubuntu 22.04 container
 - Sudo access for full system control
 - Persistent workspace folder for your files
-- Scientific MCPs pre-installed (ADIOS)
 
-### 📊 **Dual Observability**
-- **OTEL Built-in Metrics**: Cost, tokens, performance via OpenTelemetry Collector
-- **Hooks Events**: Real-time tool usage, security events via Prometheus Push Gateway
-- **Unified Visualization**: Both data sources in Grafana dashboards
+### 📊 **Prometheus Observability**
+- **Hook Events**: Real-time tool usage, security events, session tracking
+- **Push Gateway**: Collects hook events and exposes to Prometheus
+- **Grafana Dashboards**: Pre-configured visualization for Claude Code metrics
 
 ### 🔧 **Infrastructure Stack**
 - **Prometheus**: Metrics collection and storage
-- **Grafana**: Visualization and dashboards
+- **Grafana**: Visualization and dashboards  
 - **Push Gateway**: Hook events collection
-- **OTEL Collector**: Built-in telemetry processing
 
 ## Quick Start
 
 ### 1. Start the Observability Stack
 ```bash
 cd claude_telemetry
-docker-compose up -d prometheus grafana pushgateway otel-collector
+docker-compose up -d prometheus grafana pushgateway
 ```
 
 ### 2. Jump into Claude Code
@@ -34,7 +32,7 @@ docker-compose up -d prometheus grafana pushgateway otel-collector
 docker-compose run --rm claude-code
 ```
 
-That's it! Claude Code will start with full observability enabled.
+That's it! Claude Code will start with Prometheus observability enabled.
 
 ## Environment Variables
 
@@ -51,23 +49,15 @@ Once running, access the observability stack:
 - **Grafana**: http://localhost:3000 (admin/admin)
 - **Prometheus**: http://localhost:9090
 - **Push Gateway**: http://localhost:9091
-- **OTEL Metrics**: http://localhost:8888/metrics
 
 ## Data Collection
 
-### OTEL Built-in Metrics
-- Session counts and duration
-- Token consumption and costs
-- Tool usage patterns
-- Response times
-- User prompt logging (if enabled)
-
-### Hook Events
-- Real-time tool execution
-- Security blocks (dangerous commands)
-- Session lifecycle events
-- Error tracking
-- Chat transcript collection
+### Prometheus Hook Events
+- **Tool Usage**: Real-time tracking of Read, Write, Bash, etc.
+- **Security Events**: Blocks dangerous `rm -rf` commands and `.env` file access
+- **Session Lifecycle**: Start, stop, duration tracking
+- **Performance**: Tool execution timing and patterns
+- **User Activity**: Session-based metrics and usage patterns
 
 ## Workspace
 
@@ -75,22 +65,21 @@ Your files are persisted in the `./workspace` directory, which is mounted to `/h
 
 ## Configuration
 
-### Telemetry Settings
-- `CLAUDE_CODE_ENABLE_TELEMETRY=1` - Enable telemetry
-- `OTEL_LOG_USER_PROMPTS=1` - Log conversation content
-- `OTEL_METRIC_EXPORT_INTERVAL=10000` - Export every 10 seconds
+### Environment Variables
 - `PROMETHEUS_PUSH_GATEWAY=http://pushgateway:9091` - Hook events target
+- `USER_NAME` - Your name for tracking (required)
+- `USER_EMAIL` - Your email for tracking (required)
 
 ### Observability Stack
-- **Prometheus**: Scrapes OTEL metrics and Push Gateway
+- **Prometheus**: Scrapes Push Gateway for hook events
 - **Grafana**: Pre-configured with Claude Code dashboard
-- **OTEL Collector**: Exports to both file and Prometheus
+- **Push Gateway**: Collects and exposes hook metrics
 
 ## Workflow Example
 
 ```bash
 # Start infrastructure
-docker-compose up -d prometheus grafana pushgateway otel-collector
+docker-compose up -d prometheus grafana pushgateway
 
 # Jump into Claude Code
 export USER_NAME="John Doe"
@@ -98,8 +87,7 @@ export USER_EMAIL="john@example.com"
 docker-compose run --rm claude-code
 
 # Inside Claude Code container, your hooks are automatically active
-# All tool usage is tracked to Prometheus
-# All OTEL metrics flow to Prometheus
+# All tool usage is tracked to Prometheus via Push Gateway
 # View dashboards at http://localhost:3000
 ```
 
@@ -107,7 +95,6 @@ docker-compose run --rm claude-code
 
 - **Prometheus data**: Stored in `prometheus_data` volume
 - **Grafana data**: Stored in `grafana_data` volume  
-- **Telemetry files**: Stored in `./telemetry-data/`
 - **Workspace files**: Stored in `./workspace/`
 
 ## Security Features
@@ -122,8 +109,8 @@ The hooks system automatically blocks:
 ### View logs
 ```bash
 docker-compose logs claude-code
-docker-compose logs otel-collector
 docker-compose logs prometheus
+docker-compose logs pushgateway
 ```
 
 ### Reset data
@@ -141,19 +128,16 @@ cp -r .claude-template /path/to/your/project/.claude
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Claude Code   │───▶│  OTEL Collector  │───▶│   Prometheus    │
-│   (Container)   │    │  (OTLP → Prom)   │    │   (Storage)     │
+│   Claude Code   │───▶│   Push Gateway   │───▶│   Prometheus    │
+│   (Container)   │    │  (Hook Events)   │    │   (Storage)     │
+│    + Hooks      │    │                  │    │                 │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
-         │                                               │
-         │              ┌──────────────────┐            │
-         └─────────────▶│  Push Gateway    │───────────┘
-                        │  (Hook Events)   │
-                        └──────────────────┘
-                                 │
-                        ┌──────────────────┐
-                        │     Grafana      │
-                        │ (Visualization)  │
-                        └──────────────────┘
+                                                         │
+                                                         │
+                                                ┌──────────────────┐
+                                                │     Grafana      │
+                                                │ (Visualization)  │
+                                                └──────────────────┘
 ```
 
-This system provides unprecedented visibility into Claude Code usage patterns, performance, costs, and behavior - all while maintaining the familiar `docker-compose run --rm claude-code` workflow.
+This streamlined system provides excellent visibility into Claude Code usage patterns, tool usage, security events, and performance - all while maintaining the familiar `docker-compose run --rm claude-code` workflow.

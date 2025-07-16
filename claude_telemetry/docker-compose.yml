@@ -1,19 +1,4 @@
 services:
-  # OpenTelemetry Collector for telemetry collection
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    volumes:
-      - ./otel-config.yaml:/etc/otel-collector-config.yaml
-      - ./telemetry-data:/telemetry
-    ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "4318:4318"   # OTLP HTTP receiver
-      - "8888:8888"   # Prometheus metrics endpoint
-    user: "0:0"  # Run as root to avoid permission issues
-    depends_on:
-      - prometheus
-
   # Prometheus for metrics collection
   prometheus:
     image: prom/prometheus:latest
@@ -60,27 +45,6 @@ services:
       dockerfile: Dockerfile
     container_name: claude-code
     environment:
-      # Enable telemetry collection
-      - CLAUDE_CODE_ENABLE_TELEMETRY=1
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-      
-      # Configure OpenTelemetry exporters
-      - OTEL_METRICS_EXPORTER=otlp
-      - OTEL_LOGS_EXPORTER=otlp
-      
-      # Set shorter intervals for debugging
-      - OTEL_METRIC_EXPORT_INTERVAL=10000
-      - OTEL_LOGS_EXPORT_INTERVAL=5000
-      
-      # Enable full prompt logging (shows actual conversation content)
-      - OTEL_LOG_USER_PROMPTS=1
-      
-      # Enhanced logging configuration
-      - OTEL_LOGS_EXPORTER=otlp
-      - OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=grpc
-      - OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://otel-collector:4317
-      
       # Prometheus configuration for hooks
       - PROMETHEUS_PUSH_GATEWAY=http://pushgateway:9091
       
@@ -89,10 +53,8 @@ services:
       - USER_EMAIL=${USER_EMAIL}
     volumes:
       - ./workspace:/home/claude-user/workspace
-      - ./telemetry-data:/telemetry
       - ./.claude-template:/home/claude-user/.claude-template
     depends_on:
-      - otel-collector
       - pushgateway
     stdin_open: true
     tty: true

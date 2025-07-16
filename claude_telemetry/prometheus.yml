@@ -8,22 +8,9 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
-  # OpenTelemetry Collector metrics endpoint
-  - job_name: "claude-code-otel"
-    static_configs:
-      - targets: ["otel-collector:8888"]
-    scrape_interval: 10s
-    metrics_path: /metrics
-
-  # Prometheus Push Gateway for hook events
+  # Prometheus Push Gateway for Claude Code hook events
   - job_name: "claude-code-hooks"
     static_configs:
       - targets: ["pushgateway:9091"]
     honor_labels: true
     scrape_interval: 5s
-
-  # Push Gateway metrics
-  - job_name: "pushgateway"
-    static_configs:
-      - targets: ["pushgateway:9091"]
-    scrape_interval: 10s
