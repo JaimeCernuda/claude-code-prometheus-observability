@@ -22,9 +22,7 @@ RUN pip3 install uv prometheus-client
 # Install Claude Code as root (needs global permissions)
 RUN npm install -g @anthropic-ai/claude-code
 
-# Copy init script
-COPY init-hooks.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/init-hooks.sh
+# No additional scripts needed
 
 # Create claude-user with sudo privileges
 RUN useradd -m -s /bin/bash claude-user && \
@@ -36,22 +34,15 @@ USER claude-user
 WORKDIR /home/claude-user
 
 # Create workspace directory
-RUN mkdir -p /home/claude-user/workspace /home/claude-user/.claude-template
+RUN mkdir -p /home/claude-user/workspace
 
 # Switch to workspace
 WORKDIR /home/claude-user/workspace
 
-# Set environment variables for Prometheus hooks
+# Set environment variables for monitoring
+ENV CLAUDE_CODE_ENABLE_TELEMETRY=1
+ENV OTEL_METRICS_EXPORTER=prometheus
 ENV PROMETHEUS_PUSH_GATEWAY=http://pushgateway:9091
 
-# Create entrypoint script
-RUN echo '#!/bin/bash\n\
-# Initialize hooks system\n\
-/usr/local/bin/init-hooks.sh\n\
-\n\
-# Start Claude Code with dangerous mode\n\
-exec claude --dangerously-skip-permissions "$@"' > /usr/local/bin/entrypoint.sh && \
-    chmod +x /usr/local/bin/entrypoint.sh
-
-# Set entrypoint
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# Set Claude as the entrypoint with dangerous mode
+ENTRYPOINT ["claude", "--dangerously-skip-permissions"]

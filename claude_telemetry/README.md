@@ -9,10 +9,11 @@ A streamlined containerized Claude Code environment with Prometheus-based observ
 - Sudo access for full system control
 - Persistent workspace folder for your files
 
-### 📊 **Prometheus Observability**
+### 📊 **Dual Observability**
+- **OTEL Built-in Metrics**: Cost, tokens, performance via Claude Code's built-in telemetry
 - **Hook Events**: Real-time tool usage, security events, session tracking
 - **Push Gateway**: Collects hook events and exposes to Prometheus
-- **Grafana Dashboards**: Pre-configured visualization for Claude Code metrics
+- **Grafana Dashboards**: Pre-configured visualization for both data sources
 
 ### 🔧 **Infrastructure Stack**
 - **Prometheus**: Metrics collection and storage
@@ -52,12 +53,17 @@ Once running, access the observability stack:
 
 ## Data Collection
 
+### OTEL Built-in Metrics
+- **Cost Tracking**: Token usage and costs per session/model
+- **Performance**: Response times and processing metrics
+- **Session Data**: Duration, activity patterns
+- **User Prompts**: Full conversation logging (if enabled)
+
 ### Prometheus Hook Events
 - **Tool Usage**: Real-time tracking of Read, Write, Bash, etc.
 - **Security Events**: Blocks dangerous `rm -rf` commands and `.env` file access
 - **Session Lifecycle**: Start, stop, duration tracking
 - **Performance**: Tool execution timing and patterns
-- **User Activity**: Session-based metrics and usage patterns
 
 ## Workspace
 
@@ -66,12 +72,15 @@ Your files are persisted in the `./workspace` directory, which is mounted to `/h
 ## Configuration
 
 ### Environment Variables
+- `CLAUDE_CODE_ENABLE_TELEMETRY=1` - Enable built-in telemetry
+- `OTEL_METRICS_EXPORTER=prometheus` - Export OTEL metrics to Prometheus format
+- `OTEL_LOG_USER_PROMPTS=1` - Log user conversation content
 - `PROMETHEUS_PUSH_GATEWAY=http://pushgateway:9091` - Hook events target
 - `USER_NAME` - Your name for tracking (required)
 - `USER_EMAIL` - Your email for tracking (required)
 
 ### Observability Stack
-- **Prometheus**: Scrapes Push Gateway for hook events
+- **Prometheus**: Scrapes both OTEL metrics and Push Gateway
 - **Grafana**: Pre-configured with Claude Code dashboard
 - **Push Gateway**: Collects and exposes hook metrics
 
@@ -86,9 +95,11 @@ export USER_NAME="John Doe"
 export USER_EMAIL="john@example.com"
 docker-compose run --rm claude-code
 
-# Inside Claude Code container, your hooks are automatically active
-# All tool usage is tracked to Prometheus via Push Gateway
-# View dashboards at http://localhost:3000
+# Inside Claude Code container:
+# - Hooks are automatically active (mapped as volume)
+# - OTEL metrics export to Prometheus on port 8080
+# - Hook events sent to Push Gateway
+# - View dashboards at http://localhost:3000
 ```
 
 ## Data Persistence
@@ -132,12 +143,20 @@ cp -r .claude-template /path/to/your/project/.claude
 │   (Container)   │    │  (Hook Events)   │    │   (Storage)     │
 │    + Hooks      │    │                  │    │                 │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
-                                                         │
-                                                         │
-                                                ┌──────────────────┐
-                                                │     Grafana      │
-                                                │ (Visualization)  │
-                                                └──────────────────┘
+         │                                               │
+         │              ┌──────────────────┐            │
+         └─────────────▶│  OTEL Metrics    │───────────┘
+                        │    (:8080)       │
+                        └──────────────────┘
+                                 │
+                        ┌──────────────────┐
+                        │     Grafana      │
+                        │ (Visualization)  │
+                        └──────────────────┘
 ```
 
-This streamlined system provides excellent visibility into Claude Code usage patterns, tool usage, security events, and performance - all while maintaining the familiar `docker-compose run --rm claude-code` workflow.
+This system provides comprehensive visibility into Claude Code with dual telemetry:
+- **OTEL Built-in**: Costs, tokens, performance, user prompts
+- **Hook Events**: Tool usage, security, session lifecycle
+
+All while maintaining the familiar `docker-compose run --rm claude-code` workflow.

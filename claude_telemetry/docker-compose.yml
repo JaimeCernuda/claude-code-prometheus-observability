@@ -45,6 +45,13 @@ services:
       dockerfile: Dockerfile
     container_name: claude-code
     environment:
+      # OTEL monitoring configuration
+      - CLAUDE_CODE_ENABLE_TELEMETRY=1
+      - OTEL_METRICS_EXPORTER=prometheus
+      - OTEL_EXPORTER_PROMETHEUS_HOST=localhost
+      - OTEL_EXPORTER_PROMETHEUS_PORT=8080
+      - OTEL_LOG_USER_PROMPTS=1
+      
       # Prometheus configuration for hooks
       - PROMETHEUS_PUSH_GATEWAY=http://pushgateway:9091
       
@@ -53,7 +60,7 @@ services:
       - USER_EMAIL=${USER_EMAIL}
     volumes:
       - ./workspace:/home/claude-user/workspace
-      - ./.claude-template:/home/claude-user/.claude-template
+      - ./.claude-template:/home/claude-user/workspace/.claude
     depends_on:
       - pushgateway
     stdin_open: true
